@@ -1,10 +1,9 @@
-import { requestLoggerProxy, sequenceProxy } from '@/lib/proxy';
+import { requestLoggerProxy, sequenceProxy } from "@/lib/proxy";
 
-
-export const proxy = sequenceProxy([requestLoggerProxy])
+export const proxy = sequenceProxy([]);
 
 export const config = {
-    matcher: [
-        '/((?!api|_next/static|_next/image|.*\\.png$).*)',
-    ],
-}
+  matcher: [
+    "/((?!.well-known|favicon.ico|api|_next/static|_next/image|.*\\.png$).*)",
+  ],
+};
