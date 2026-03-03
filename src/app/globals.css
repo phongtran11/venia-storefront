@@ -132,7 +132,6 @@
 
   @variant sm {
     max-width: var(--breakpoint-sm);
-    padding-inline: 2rem;
   }
   @variant md {
     max-width: var(--breakpoint-md);

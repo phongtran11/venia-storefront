@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { ApolloProvider } from "@/lib/apollo";
 import "./globals.css";
+import { Header } from "@/components/organisms";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
-
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -21,10 +21,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} antialiased`}
-      >
-        <ApolloProvider>{children}</ApolloProvider>
+      <body className={`${geistSans.variable} antialiased`}>
+        <ApolloProvider>
+          <Header />
+          {children}
+        </ApolloProvider>
       </body>
     </html>
   );

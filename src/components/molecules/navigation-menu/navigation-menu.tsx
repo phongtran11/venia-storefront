@@ -31,12 +31,12 @@ export function NavigationMenu({
     });
 
   return (
-    <nav className="hidden lg:flex items-center h-full">
+    <nav className="hidden lg:flex items-center h-full col-span-8 justify-center">
       {navItems.map((item) => (
         <div key={item.uid} className="group relative h-full flex items-center">
           <Link
             href={item.href}
-            className="flex items-center gap-1 px-4 py-6 text-sm font-medium text-foreground/80 hover:text-foreground group-hover:underline underline-offset-4 transition-colors h-full"
+            className="flex items-center gap-1 px-2 py-6 text-sm font-medium text-foreground/80 hover:text-foreground group-hover:underline underline-offset-4 transition-colors h-full"
           >
             {item.label}
             {item.hasChildren && (

@@ -1,14 +1,14 @@
 import { CurrencySwitcher, StoreSwitcher } from "@/components/molecules";
-import { Separator } from "@/components/ui";
-import { GetStoreConfigQuery } from "@/gql/graphql";
+import { Separator } from "@/components/atoms";
 import { COOKIE_KEYS, getCookie } from "@/lib/cookie";
+import { GetHeaderStoreConfigQuery } from "@/gql/graphql";
 
 export async function TopBar({
-  availableStores,
-  currency,
+  availableStoresData,
+  currencyData,
 }: {
-  availableStores: GetStoreConfigQuery["availableStores"];
-  currency: GetStoreConfigQuery["currency"];
+  availableStoresData: GetHeaderStoreConfigQuery["availableStores"];
+  currencyData: GetHeaderStoreConfigQuery["currency"];
 }) {
   const [currentStore, currentCurrency] = await Promise.all([
     getCookie(COOKIE_KEYS.STORE_VIEW),
@@ -19,12 +19,12 @@ export async function TopBar({
     <div className="bg-accent">
       <div className="container flex items-center justify-end">
         <StoreSwitcher
-          availableStores={availableStores}
+          availableStoresFragment={availableStoresData}
           currentStore={currentStore || "default"}
         />
         <Separator orientation="vertical" className="h-4! bg-foreground" />
         <CurrencySwitcher
-          currency={currency}
+          currencyFragment={currencyData}
           currentCurrency={currentCurrency || "USD"}
         />
       </div>

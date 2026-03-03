@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   serverExternalPackages: ["pino", "pino-pretty"],
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
+  },
   logging: {
     fetches: {
       fullUrl: true,

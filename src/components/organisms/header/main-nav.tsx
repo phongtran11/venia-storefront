@@ -1,12 +1,7 @@
 import Link from "next/link";
-import { NavigationMenu } from "./navigation-menu";
-import { HeaderActions } from "./header-actions";
+import { HeaderActions, NavigationMenu } from "@/components/molecules";
 import Image from "next/image";
 import { GetNavigationMenuQuery } from "@/gql/graphql";
-import { PreloadQuery } from "@/lib/apollo";
-import { GET_HEADER_CUSTOMER } from "@/graphql";
-import { Suspense } from "react";
-import { Spinner } from "@/components/ui";
 
 export async function MainNav({
   logoSrc,
@@ -19,9 +14,12 @@ export async function MainNav({
 }) {
   return (
     <div className="border-b relative">
-      <div className="container flex items-center justify-between">
+      <div className="container grid grid-cols-12">
         {/* Logo */}
-        <Link href="/" className="shrink-0">
+        <Link
+          href="/"
+          className="shrink-0 col-span-2 flex items-center justify-center"
+        >
           {logoSrc ? (
             <Image
               src={logoSrc}
@@ -41,17 +39,7 @@ export async function MainNav({
         <NavigationMenu navigationData={navigationData} />
 
         {/* Actions: Search, Account, Cart */}
-        <PreloadQuery query={GET_HEADER_CUSTOMER}>
-          <Suspense
-            fallback={
-              <div className="w-[124px] h-[36px] flex items-center justify-center">
-                <Spinner />
-              </div>
-            }
-          >
-            <HeaderActions />
-          </Suspense>
-        </PreloadQuery>
+        <HeaderActions />
       </div>
     </div>
   );

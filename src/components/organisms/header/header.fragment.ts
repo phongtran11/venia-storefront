@@ -1,6 +1,7 @@
 import { graphql } from "@/gql";
-export const GET_STORE_CONFIG = graphql(`
-  query GetStoreConfig {
+
+export const GET_HEADER_STORE_CONFIG = graphql(`
+  query GetHeaderStoreConfig {
     storeConfig {
       header_logo_src
       logo_alt

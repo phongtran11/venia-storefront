@@ -1,6 +1,5 @@
 "use client";
 
-import { GetStoreConfigQuery } from "@/gql/graphql";
 import {
   Select,
   SelectContent,
@@ -8,28 +7,39 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui";
+} from "@/components/atoms";
 import { useEffect, useState } from "react";
 import { setStoreAction } from "@/lib/actions/store-actions";
+import { AvailableStoreFragment } from "./store-switcher.fragment";
+import { FragmentType, useFragment } from "@/gql";
+import { GetHeaderStoreConfigQuery } from "@/gql/graphql";
 
 export function StoreSwitcher({
-  availableStores,
+  availableStoresFragment,
   currentStore,
 }: {
-  availableStores: GetStoreConfigQuery["availableStores"];
+  availableStoresFragment: GetHeaderStoreConfigQuery["availableStores"];
   currentStore: string;
 }) {
   const [mounted, setMounted] = useState(false);
 
-  const activeStore =
-    availableStores?.find((store) => store?.store_code === currentStore) ||
-    availableStores?.find((store) => store?.is_default_store);
+  const availableStores = useFragment(
+    AvailableStoreFragment,
+    availableStoresFragment?.filter(Boolean) as Array<
+      FragmentType<typeof AvailableStoreFragment>
+    >,
+  );
+
+  const activeStore = availableStores?.find(
+    (store) => store?.store_code === currentStore || store?.is_default_store,
+  );
 
   const handleValueChange = async (value: string) => {
     await setStoreAction(value);
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 

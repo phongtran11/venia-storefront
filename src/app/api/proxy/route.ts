@@ -1,3 +1,4 @@
+import { COOKIE_KEYS, getCookie } from "@/lib/cookie";
 import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 
@@ -33,6 +34,7 @@ export async function POST(request: Request) {
 async function handleClientHeaders(headers: Headers) {
   const clientHeaders = await getClientHeaders(headers);
   const mergedHeaders = await mergeHeaders(clientHeaders);
+  await handleAuthToken(mergedHeaders);
   return mergedHeaders;
 }
 
@@ -48,4 +50,11 @@ async function mergeHeaders(headers: Headers) {
   mergedHeaders.set("Content-Type", "application/json");
 
   return mergedHeaders;
+}
+
+async function handleAuthToken(headers: Headers) {
+  const authToken = await getCookie(COOKIE_KEYS.AUTH_TOKEN);
+  if (authToken) {
+    headers.set("Authorization", `Bearer ${authToken}`);
+  }
 }

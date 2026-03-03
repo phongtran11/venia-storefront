@@ -8,19 +8,23 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui";
-import { GetStoreConfigQuery } from "@/gql/graphql";
+} from "@/components/atoms";
 import { setCurrencyAction } from "@/lib/actions/store-actions";
 import { useEffect, useState } from "react";
+import { CurrencyFragment } from "./currency-switcher.fragment";
+import { useFragment } from "@/gql";
+import { GetHeaderStoreConfigQuery } from "@/gql/graphql";
 
 export function CurrencySwitcher({
-  currency,
+  currencyFragment,
   currentCurrency,
 }: {
-  currency: GetStoreConfigQuery["currency"];
+  currencyFragment: GetHeaderStoreConfigQuery["currency"];
   currentCurrency: string;
 }) {
   const [mounted, setMounted] = useState(false);
+
+  const currency = useFragment(CurrencyFragment, currencyFragment);
 
   const activeCurrencyCode =
     currentCurrency || currency?.default_display_currency_code;
@@ -35,6 +39,7 @@ export function CurrencySwitcher({
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
