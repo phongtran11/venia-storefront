@@ -1,4 +1,4 @@
-import { requestLoggerProxy, sequenceProxy } from "@/lib/proxy";
+import { sequenceProxy } from "@/lib/proxy";
 
 export const proxy = sequenceProxy([]);
 

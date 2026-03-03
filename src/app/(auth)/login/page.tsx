@@ -48,8 +48,7 @@ export default function LoginPage() {
         const token = data?.generateCustomerToken?.token;
         if (token) {
           await loginAction(token);
-          router.push("/");
-          router.refresh();
+          router.replace("/");
         }
       },
     },

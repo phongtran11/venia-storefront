@@ -124,3 +124,26 @@
     @apply bg-background text-foreground;
   }
 }
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 1rem;
+  width: 100%;
+
+  @variant sm {
+    max-width: var(--breakpoint-sm);
+    padding-inline: 2rem;
+  }
+  @variant md {
+    max-width: var(--breakpoint-md);
+  }
+  @variant lg {
+    max-width: var(--breakpoint-lg);
+  }
+  @variant xl {
+    max-width: var(--breakpoint-xl);
+  }
+  @variant 2xl {
+    max-width: var(--breakpoint-2xl);
+  }
+}

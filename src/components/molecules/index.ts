@@ -1,2 +1,2 @@
-export * from './store-currency'
-export * from './store-view'
+export * from "./currency-switcher";
+export * from "./store-switcher";

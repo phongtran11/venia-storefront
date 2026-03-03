@@ -12,7 +12,7 @@ import {
 import { useEffect, useState } from "react";
 import { setStoreAction } from "@/lib/actions/store-actions";
 
-export function StoreView({
+export function StoreSwitcher({
   availableStores,
   currentStore,
 }: {

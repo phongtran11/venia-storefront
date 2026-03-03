@@ -1,35 +1,37 @@
 import { query } from "@/lib/apollo";
-import { GET_STORE_CONFIG } from "@/graphql";
-import { getCookie } from "@/lib/cookie";
+import { GET_NAVIGATION_MENU, GET_STORE_CONFIG } from "@/graphql";
 import { TopBar } from "./top-bar";
 import { MainNav } from "./main-nav";
 
 export async function Header() {
-  const storeConfig = await query({
-    query: GET_STORE_CONFIG,
-  });
+  const [storeConfigRes, navMenuRes] = await Promise.all([
+    query({
+      query: GET_STORE_CONFIG,
+    }),
+    query({
+      query: GET_NAVIGATION_MENU,
+    }),
+  ]);
 
-  if (!storeConfig.data?.currency || !storeConfig.data?.availableStores) {
+  if (!storeConfigRes.data?.currency || !storeConfigRes.data?.availableStores) {
     throw new Error("Failed to load store config");
   }
 
-  const [storeCookie, currencyCookie] = await Promise.all([
-    getCookie("store"),
-    getCookie("currency"),
-  ]);
-
   return (
-    <header className="w-full">
+    <>
+      {/* Top Bar: Store View & Currency */}
       <TopBar
-        availableStores={storeConfig.data.availableStores}
-        currency={storeConfig.data.currency}
-        currentStore={storeCookie || ""}
-        currentCurrency={currencyCookie || ""}
+        availableStores={storeConfigRes.data.availableStores}
+        currency={storeConfigRes.data.currency}
       />
-      <MainNav
-        logoSrc={storeConfig.data.storeConfig?.header_logo_src}
-        logoAlt={storeConfig.data.storeConfig?.logo_alt}
-      />
-    </header>
+      <header className="w-full sticky">
+        {/* Main Navigation: Logo, Navigation Menu, Search, Account, Cart */}
+        <MainNav
+          logoSrc={storeConfigRes.data.storeConfig?.header_logo_src}
+          logoAlt={storeConfigRes.data.storeConfig?.logo_alt}
+          navigationData={navMenuRes.data}
+        />
+      </header>
+    </>
   );
 }

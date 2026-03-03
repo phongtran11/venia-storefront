@@ -13,7 +13,7 @@ import { GetStoreConfigQuery } from "@/gql/graphql";
 import { setCurrencyAction } from "@/lib/actions/store-actions";
 import { useEffect, useState } from "react";
 
-export function StoreCurrency({
+export function CurrencySwitcher({
   currency,
   currentCurrency,
 }: {
@@ -26,8 +26,8 @@ export function StoreCurrency({
     currentCurrency || currency?.default_display_currency_code;
 
   const currencyIcons = {
-    USD: <DollarSign className="mr-2 h-4 w-4" />,
-    EUR: <Euro className="mr-2 h-4 w-4" />,
+    USD: <DollarSign className="h-4 w-4 text-primary" />,
+    EUR: <Euro className="h-4 w-4 text-primary" />,
   };
 
   const handleValueChange = async (value: string) => {
@@ -40,8 +40,8 @@ export function StoreCurrency({
 
   if (!mounted) {
     return (
-      <div className="h-9 px-3 py-2 text-sm flex items-center gap-2">
-        {currencyIcons[activeCurrencyCode as keyof typeof currencyIcons]}{" "}
+      <div className="h-9 px-3 py-2 text-sm flex items-center justify-center gap-2">
+        {currencyIcons[activeCurrencyCode as keyof typeof currencyIcons]}
         {activeCurrencyCode}
       </div>
     );
@@ -53,13 +53,13 @@ export function StoreCurrency({
       defaultValue={activeCurrencyCode || ""}
     >
       <SelectTrigger className="border-none shadow-none focus-visible:ring-0 [&>_svg]:hidden">
-        <SelectValue />
+        <SelectValue className="flex items-center justify-center" />
       </SelectTrigger>
       <SelectContent position="popper">
         <SelectGroup>
           {currency?.available_currency_codes?.map((currencyCode) => (
             <SelectItem key={currencyCode} value={currencyCode || ""}>
-              {currencyIcons[currencyCode as keyof typeof currencyIcons]}
+              {currencyIcons[currencyCode as keyof typeof currencyIcons]}{" "}
               {currencyCode}
             </SelectItem>
           ))}

@@ -3,8 +3,16 @@
 import { Search, ShoppingBag, User } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui";
+import { useSuspenseQuery } from "@apollo/client/react";
+import { GET_HEADER_CUSTOMER } from "@/graphql";
 
-export function HeaderActions({ customerName }: { customerName?: string }) {
+export function HeaderActions() {
+  const { data } = useSuspenseQuery(GET_HEADER_CUSTOMER, {
+    errorPolicy: "ignore",
+  });
+
+  const customerName = data?.customer?.firstname;
+
   return (
     <div className="flex items-center gap-1">
       <Button variant="ghost" size="icon" aria-label="Search">

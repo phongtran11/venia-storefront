@@ -4,7 +4,7 @@ import {
   ApolloClient,
   InMemoryCache,
 } from "@apollo/client-integration-nextjs";
-import { getCookie } from "@/lib/cookie";
+import { COOKIE_KEYS, getCookie } from "@/lib/cookie";
 import { logger } from "../logger";
 import { tap } from "rxjs";
 
@@ -12,11 +12,8 @@ const loggerLink = new ApolloLink((operation, forward) => {
   const { operationName, variables } = operation;
 
   return forward(operation).pipe(
-    tap((data) => {
-      logger.info(
-        data,
-        `[Apollo RSC] ${operationName} : ${JSON.stringify(variables)}`,
-      );
+    tap(() => {
+      logger.info(variables, `[Apollo RSC] ${operationName}`);
     }),
   );
 });
@@ -24,8 +21,8 @@ const loggerLink = new ApolloLink((operation, forward) => {
 export const { getClient, query, PreloadQuery } = registerApolloClient(
   async () => {
     const [store, currency] = await Promise.all([
-      getCookie("store"),
-      getCookie("currency"),
+      getCookie(COOKIE_KEYS.STORE_VIEW),
+      getCookie(COOKIE_KEYS.CURRENCY),
     ]);
 
     const headers: Record<string, string> = {};
