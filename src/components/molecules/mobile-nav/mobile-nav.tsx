@@ -15,6 +15,7 @@ import {
 } from "@/gql/graphql";
 import { StoreSwitcher, CurrencySwitcher } from "@/components/molecules";
 import { COOKIE_KEYS, getCookie } from "@/lib/cookie";
+import { MobileNavClient } from "./mobile-nav-client";
 
 export async function MobileNav({
   navigationData,
@@ -36,7 +37,24 @@ export async function MobileNav({
   const categories = navigationData?.categories?.items?.[0]?.children || [];
   const navItems = categories
     .slice()
-    .sort((a, b) => Number(a?.position) - Number(b?.position));
+    .sort((a, b) => Number(a?.position) - Number(b?.position))
+    .map((cat) => {
+      const children = (cat?.children || [])
+        .slice()
+        .sort((a, b) => Number(a?.position) - Number(b?.position));
+
+      return {
+        uid: cat?.uid || "",
+        name: cat?.name || "",
+        url_path: cat?.url_path || "",
+        children: children.map((child) => ({
+          uid: child?.uid || "",
+          name: child?.name || "",
+          url_path: child?.url_path || "",
+          children: [],
+        })),
+      };
+    });
 
   return (
     <div className="lg:hidden flex items-center">
@@ -59,18 +77,7 @@ export async function MobileNav({
             </span>
           </div>
           <div className="flex-1 overflow-auto">
-            <nav className="flex flex-col">
-              {navItems.map((item) => (
-                <div key={item?.uid} className="border-b border-border/50">
-                  <Link
-                    href={`/${item?.url_path}`}
-                    className="flex items-center py-4 px-6 text-base font-medium"
-                  >
-                    {item?.name}
-                  </Link>
-                </div>
-              ))}
-            </nav>
+            <MobileNavClient navItems={navItems} />
           </div>
           <div className="mt-auto border-t">
             <div className="p-4 flex items-center bg-accent/50 justify-between">
