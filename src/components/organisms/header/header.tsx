@@ -31,6 +31,8 @@ export async function Header() {
           logoSrc={storeConfigRes.data.storeConfig?.header_logo_src}
           logoAlt={storeConfigRes.data.storeConfig?.logo_alt}
           navigationData={navMenuRes.data}
+          availableStoresData={storeConfigRes.data?.availableStores}
+          currencyData={storeConfigRes.data?.currency}
         />
       </header>
     </>

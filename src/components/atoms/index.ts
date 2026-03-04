@@ -11,3 +11,4 @@ export * from "./label";
 export * from "./spinner";
 export * from "./dropdown-menu";
 export * from "./checkbox";
+export * from "./sheet";

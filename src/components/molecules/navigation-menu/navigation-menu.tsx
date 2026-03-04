@@ -31,7 +31,7 @@ export function NavigationMenu({
     });
 
   return (
-    <nav className="hidden lg:flex items-center h-full col-span-8 justify-center">
+    <nav className="flex items-center h-full">
       {navItems.map((item) => (
         <div key={item.uid} className="group relative h-full flex items-center">
           <Link

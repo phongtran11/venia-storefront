@@ -25,14 +25,16 @@ export async function HeaderActions() {
   }
 
   return (
-    <div className="flex items-center gap-1 col-span-2 justify-end">
+    <div className="flex items-center gap-1 justify-end">
       <Button variant="ghost" size="icon" aria-label="Search">
         <Search className="h-5 w-5" />
       </Button>
-      <HeaderUserActions
-        isAuthenticated={isAuthenticated}
-        recaptchaConfig={recaptchaConfig}
-      />
+      <div className="hidden md:block">
+        <HeaderUserActions
+          isAuthenticated={isAuthenticated}
+          recaptchaConfig={recaptchaConfig}
+        />
+      </div>
       <HeaderShoppingBag isAuthenticated={isAuthenticated} />
     </div>
   );

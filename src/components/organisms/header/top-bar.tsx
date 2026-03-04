@@ -16,8 +16,8 @@ export async function TopBar({
   ]);
 
   return (
-    <div className="bg-accent">
-      <div className="container flex items-center justify-end">
+    <div className="hidden md:block bg-accent">
+      <div className="container flex items-center justify-end py-1">
         <StoreSwitcher
           availableStoresFragment={availableStoresData}
           currentStore={currentStore || "default"}
