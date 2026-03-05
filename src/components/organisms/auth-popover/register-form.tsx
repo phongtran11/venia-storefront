@@ -32,15 +32,17 @@ const registerSchema = z.object({
   is_subscribed: z.boolean().optional(),
 });
 
+export type RegisterFormProps = {
+  recaptchaConfig: GetRecaptchaConfigQuery["recaptchaFormConfig"] | null;
+  onCancel: () => void;
+  onSuccess: () => void;
+};
+
 export function RegisterForm({
   recaptchaConfig,
   onCancel,
   onSuccess,
-}: {
-  recaptchaConfig: GetRecaptchaConfigQuery["recaptchaFormConfig"] | null;
-  onCancel: () => void;
-  onSuccess: () => void;
-}) {
+}: RegisterFormProps) {
   if (recaptchaConfig?.is_enabled) {
     return (
       <GoogleReCaptchaProvider
@@ -56,7 +58,7 @@ export function RegisterForm({
         }}
         reCaptchaKey={recaptchaConfig?.configurations?.website_key || ""}
       >
-        <RegisterFormContent
+        <RecaptchaRegisterFormContent
           recaptchaConfig={recaptchaConfig}
           onCancel={onCancel}
           onSuccess={onSuccess}
@@ -66,26 +68,42 @@ export function RegisterForm({
   }
 
   return (
+    <RegisterFormContent onCancel={onCancel} onSuccess={onSuccess} />
+  );
+}
+
+function RecaptchaRegisterFormContent({
+  recaptchaConfig,
+  onCancel,
+  onSuccess,
+}: RegisterFormProps) {
+  const { executeRecaptcha } = useGoogleReCaptcha();
+
+  return (
     <RegisterFormContent
-      recaptchaConfig={recaptchaConfig}
       onCancel={onCancel}
       onSuccess={onSuccess}
+      recaptchaRequired
+      getRecaptchaToken={
+        recaptchaConfig?.is_enabled && executeRecaptcha
+          ? () => executeRecaptcha("customer_create")
+          : undefined
+      }
     />
   );
 }
 
 function RegisterFormContent({
-  recaptchaConfig,
   onCancel,
   onSuccess,
+  recaptchaRequired,
+  getRecaptchaToken,
 }: {
-  recaptchaConfig: GetRecaptchaConfigQuery["recaptchaFormConfig"] | null;
   onCancel: () => void;
   onSuccess: () => void;
+  recaptchaRequired?: boolean;
+  getRecaptchaToken?: () => Promise<string>;
 }) {
-  const recaptcha = useGoogleReCaptcha();
-  const executeRecaptcha = recaptcha?.executeRecaptcha;
-
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -97,16 +115,17 @@ function RegisterFormContent({
     },
   });
 
+  const recaptchaLoading = recaptchaRequired && !getRecaptchaToken;
+
   const [createCustomer, { loading, error }] = useMutation(CREATE_CUSTOMER, {
     onCompleted: onSuccess,
   });
 
   const onSubmit = async (values: z.infer<typeof registerSchema>) => {
     try {
-      let token = null;
-      if (recaptchaConfig?.is_enabled && executeRecaptcha) {
-        token = await executeRecaptcha("customer_create");
-      }
+      const token = getRecaptchaToken
+        ? await getRecaptchaToken()
+        : null;
 
       await createCustomer({
         variables: {
@@ -114,6 +133,7 @@ function RegisterFormContent({
           lastname: values.lastname,
           email: values.email,
           password: values.password,
+          is_subscribed: values.is_subscribed ?? false,
         },
         context: token ? { headers: { "X-ReCaptcha": token } } : undefined,
       });
@@ -212,14 +232,14 @@ function RegisterFormContent({
               variant="outline"
               className="flex-1"
               onClick={onCancel}
-              disabled={loading}
+              disabled={loading || recaptchaLoading}
             >
               CANCEL
             </Button>
             <Button
               type="submit"
               className="flex-1 bg-primary hover:bg-primary/90"
-              disabled={loading}
+              disabled={loading || recaptchaLoading}
             >
               {loading ? <Spinner className="size-4 mr-2" /> : null}
               CREATE AN ACCOUNT

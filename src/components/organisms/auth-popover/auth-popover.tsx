@@ -11,18 +11,24 @@ import {
 import { GetRecaptchaConfigQuery } from "@/gql/graphql";
 import { LoginForm } from "./login-form";
 import { RegisterForm } from "./register-form";
+import { ForgotPasswordForm } from "./forgot-password-form";
 
-type AuthView = "login" | "register";
+type RecaptchaConfig = GetRecaptchaConfigQuery["recaptchaFormConfig"] | null;
+
+type AuthView = "login" | "register" | "forgot-password";
 
 export function AuthPopover({
-  recaptchaConfig,
+  recaptchaConfigs,
 }: {
-  recaptchaConfig: GetRecaptchaConfigQuery["recaptchaFormConfig"] | null;
+  recaptchaConfigs: {
+    login: RecaptchaConfig;
+    register: RecaptchaConfig;
+    forgotPassword: RecaptchaConfig;
+  };
 }) {
   const [view, setView] = useState<AuthView>("login");
   const [isOpen, setIsOpen] = useState(false);
 
-  // When popover closes, reset view to login
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
     if (!open) {
@@ -42,25 +48,30 @@ export function AuthPopover({
         align="end"
         className="w-[360px] p-6"
         onInteractOutside={(e) => {
-          // Prevent closing if we interact within recaptcha badge
           if ((e.target as Element).closest(".grecaptcha-badge")) {
             e.preventDefault();
           }
         }}
       >
-        {view === "login" ? (
+        {view === "login" && (
           <LoginForm
+            recaptchaConfig={recaptchaConfigs.login}
             onSwitchToRegister={() => setView("register")}
+            onForgotPassword={() => setView("forgot-password")}
             onSuccess={() => setIsOpen(false)}
           />
-        ) : (
+        )}
+        {view === "register" && (
           <RegisterForm
-            recaptchaConfig={recaptchaConfig}
+            recaptchaConfig={recaptchaConfigs.register}
             onCancel={() => setView("login")}
-            onSuccess={() => {
-              setView("login");
-              // User now has to login with new credentials
-            }}
+            onSuccess={() => setView("login")}
+          />
+        )}
+        {view === "forgot-password" && (
+          <ForgotPasswordForm
+            recaptchaConfig={recaptchaConfigs.forgotPassword}
+            onCancel={() => setView("login")}
           />
         )}
       </PopoverContent>

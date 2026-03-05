@@ -1,21 +1,26 @@
-import { Menu, User } from "lucide-react";
-import Link from "next/link";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  Button,
-  Separator,
-} from "@/components/atoms";
+import { Separator } from "@/components/atoms";
 import {
   GetNavigationMenuQuery,
   GetHeaderStoreConfigQuery,
+  ReCaptchaFormEnum,
 } from "@/gql/graphql";
 import { StoreSwitcher, CurrencySwitcher } from "@/components/molecules";
 import { COOKIE_KEYS, getCookie } from "@/lib/cookie";
-import { MobileNavClient } from "./mobile-nav-client";
+import { query } from "@/lib/apollo";
+import { GET_RECAPTCHA_CONFIG } from "@/graphql/auth/query";
+import { MobileNavSheet } from "./mobile-nav-sheet";
+
+async function fetchRecaptchaConfig(formType: ReCaptchaFormEnum) {
+  try {
+    const res = await query({
+      query: GET_RECAPTCHA_CONFIG,
+      variables: { formType },
+    });
+    return res.data?.recaptchaFormConfig ?? null;
+  } catch {
+    return null;
+  }
+}
 
 export async function MobileNav({
   navigationData,
@@ -33,6 +38,21 @@ export async function MobileNav({
   ]);
 
   const isAuthenticated = Boolean(authToken);
+
+  let recaptchaConfigs = {
+    login: null as Awaited<ReturnType<typeof fetchRecaptchaConfig>>,
+    register: null as Awaited<ReturnType<typeof fetchRecaptchaConfig>>,
+    forgotPassword: null as Awaited<ReturnType<typeof fetchRecaptchaConfig>>,
+  };
+
+  if (!isAuthenticated) {
+    const [login, register, forgotPassword] = await Promise.all([
+      fetchRecaptchaConfig(ReCaptchaFormEnum.CustomerLogin),
+      fetchRecaptchaConfig(ReCaptchaFormEnum.CustomerCreate),
+      fetchRecaptchaConfig(ReCaptchaFormEnum.CustomerForgotPassword),
+    ]);
+    recaptchaConfigs = { login, register, forgotPassword };
+  }
 
   const categories = navigationData?.categories?.items?.[0]?.children || [];
   const navItems = categories
@@ -58,70 +78,31 @@ export async function MobileNav({
 
   return (
     <div className="lg:hidden flex items-center">
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" aria-label="Menu">
-            <Menu className="h-6 w-6" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent
-          side="left"
-          className="w-[85vw] max-w-sm p-0 flex flex-col"
-        >
-          <SheetHeader className="p-4 border-b sr-only">
-            <SheetTitle>Main Menu</SheetTitle>
-          </SheetHeader>
-          <div className="p-4 border-b flex justify-center items-center">
-            <span className="text-xl font-light tracking-[0.3em] text-foreground">
-              Main Menu
-            </span>
-          </div>
-          <div className="flex-1 overflow-auto">
-            <MobileNavClient navItems={navItems} />
-          </div>
-          <div className="mt-auto border-t">
-            <div className="p-4 flex items-center bg-accent/50 justify-between">
-              <div className="flex-1">
-                <StoreSwitcher
-                  availableStoresFragment={availableStoresData || null}
-                  currentStore={currentStore || "default"}
-                />
-              </div>
-              <Separator
-                orientation="vertical"
-                className="h-4 bg-foreground mx-4"
+      <MobileNavSheet
+        navItems={navItems}
+        isAuthenticated={isAuthenticated}
+        recaptchaConfigs={recaptchaConfigs}
+        footer={
+          <div className="p-4 flex items-center bg-accent/50 justify-between">
+            <div className="flex-1">
+              <StoreSwitcher
+                availableStoresFragment={availableStoresData || null}
+                currentStore={currentStore || "default"}
               />
-              <div>
-                <CurrencySwitcher
-                  currencyFragment={currencyData || null}
-                  currentCurrency={currentCurrency || "USD"}
-                />
-              </div>
             </div>
-            <div className="p-4 border-t flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                <span className="font-semibold">Account</span>
-              </div>
-              {isAuthenticated ? (
-                <Link
-                  href="/account-information"
-                  className="text-blue-600 font-medium text-sm"
-                >
-                  View Account
-                </Link>
-              ) : (
-                <Link
-                  href="/login"
-                  className="text-blue-600 font-medium text-sm"
-                >
-                  Sign In
-                </Link>
-              )}
+            <Separator
+              orientation="vertical"
+              className="h-4 bg-foreground mx-4"
+            />
+            <div>
+              <CurrencySwitcher
+                currencyFragment={currencyData || null}
+                currentCurrency={currentCurrency || "USD"}
+              />
             </div>
           </div>
-        </SheetContent>
-      </Sheet>
+        }
+      />
     </div>
   );
 }

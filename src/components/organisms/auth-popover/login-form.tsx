@@ -7,6 +7,10 @@ import * as z from "zod";
 import { useMutation, useApolloClient } from "@apollo/client/react";
 import { useRouter } from "next/navigation";
 import {
+  GoogleReCaptchaProvider,
+  useGoogleReCaptcha,
+} from "react-google-recaptcha-v3";
+import {
   Button,
   Input,
   Form,
@@ -20,6 +24,7 @@ import {
 
 import { GENERATE_CUSTOMER_TOKEN } from "@/graphql/auth/mutation";
 import { loginAction } from "@/lib/actions/auth-actions";
+import { GetRecaptchaConfigQuery } from "@/gql/graphql";
 
 const loginSchema = z.object({
   email: z
@@ -29,16 +34,94 @@ const loginSchema = z.object({
   password: z.string().min(1, { message: "Password is required" }),
 });
 
+export type LoginFormProps = {
+  recaptchaConfig: GetRecaptchaConfigQuery["recaptchaFormConfig"] | null;
+  onSwitchToRegister: () => void;
+  onForgotPassword: () => void;
+  onSuccess: () => void;
+};
+
 export function LoginForm({
+  recaptchaConfig,
   onSwitchToRegister,
+  onForgotPassword,
   onSuccess,
+}: LoginFormProps) {
+  if (recaptchaConfig?.is_enabled) {
+    return (
+      <GoogleReCaptchaProvider
+        container={{
+          parameters: {
+            badge:
+              (recaptchaConfig.configurations?.badge_position as
+                | "inline"
+                | "bottomleft"
+                | "bottomright"
+                | undefined) || "inline",
+          },
+        }}
+        reCaptchaKey={recaptchaConfig?.configurations?.website_key || ""}
+      >
+        <RecaptchaLoginFormContent
+          recaptchaConfig={recaptchaConfig}
+          onSwitchToRegister={onSwitchToRegister}
+          onForgotPassword={onForgotPassword}
+          onSuccess={onSuccess}
+        />
+      </GoogleReCaptchaProvider>
+    );
+  }
+
+  return (
+    <LoginFormContent
+      onSwitchToRegister={onSwitchToRegister}
+      onForgotPassword={onForgotPassword}
+      onSuccess={onSuccess}
+    />
+  );
+}
+
+function RecaptchaLoginFormContent({
+  recaptchaConfig,
+  onSwitchToRegister,
+  onForgotPassword,
+  onSuccess,
+}: LoginFormProps) {
+  const { executeRecaptcha } = useGoogleReCaptcha();
+
+  return (
+    <LoginFormContent
+      onSwitchToRegister={onSwitchToRegister}
+      onForgotPassword={onForgotPassword}
+      onSuccess={onSuccess}
+      recaptchaRequired
+      getRecaptchaToken={
+        recaptchaConfig?.is_enabled && executeRecaptcha
+          ? () => executeRecaptcha("customer_login")
+          : undefined
+      }
+    />
+  );
+}
+
+function LoginFormContent({
+  onSwitchToRegister,
+  onForgotPassword,
+  onSuccess,
+  recaptchaRequired,
+  getRecaptchaToken,
 }: {
   onSwitchToRegister: () => void;
+  onForgotPassword: () => void;
   onSuccess: () => void;
+  recaptchaRequired?: boolean;
+  getRecaptchaToken?: () => Promise<string>;
 }) {
   const router = useRouter();
   const client = useApolloClient();
   const [isPending, startTransition] = useTransition();
+
+  const recaptchaLoading = recaptchaRequired && !getRecaptchaToken;
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -64,11 +147,22 @@ export function LoginForm({
 
   const onSubmit = async (values: z.infer<typeof loginSchema>) => {
     try {
-      await generateCustomerToken({ variables: values });
+      const captchaToken = getRecaptchaToken
+        ? await getRecaptchaToken()
+        : null;
+
+      await generateCustomerToken({
+        variables: values,
+        context: captchaToken
+          ? { headers: { "X-ReCaptcha": captchaToken } }
+          : undefined,
+      });
     } catch (e) {
       console.error(e);
     }
   };
+
+  const isDisabled = loading || isPending || recaptchaLoading;
 
   return (
     <div className="space-y-4">
@@ -105,9 +199,13 @@ export function LoginForm({
           />
 
           <div className="flex justify-between items-center text-sm">
-            <a href="#" className="text-primary hover:underline">
+            <button
+              type="button"
+              className="text-primary hover:underline"
+              onClick={onForgotPassword}
+            >
               Forgot Password?
-            </a>
+            </button>
           </div>
 
           {error && (
@@ -117,11 +215,7 @@ export function LoginForm({
           )}
 
           <div className="flex flex-col gap-3 pt-2">
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={loading || isPending}
-            >
+            <Button type="submit" className="w-full" disabled={isDisabled}>
               {loading || isPending ? (
                 <Spinner className="size-4 mr-2" />
               ) : null}
@@ -132,6 +226,7 @@ export function LoginForm({
               variant="outline"
               className="w-full text-primary border-primary hover:bg-primary/5"
               onClick={onSwitchToRegister}
+              disabled={isDisabled}
             >
               CREATE AN ACCOUNT
             </Button>

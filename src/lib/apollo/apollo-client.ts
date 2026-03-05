@@ -36,9 +36,6 @@ export const { getClient, query, PreloadQuery } = registerApolloClient(
         new HttpLink({
           uri: process.env.MAGENTO_BE_API!,
           headers,
-          fetchOptions: {
-            cache: "no-cache",
-          },
         }),
       ]),
     });

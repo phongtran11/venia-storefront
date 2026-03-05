@@ -1,28 +1,22 @@
-import { Search } from "lucide-react/";
-import { Button } from "@/components/atoms";
+import { Suspense } from "react";
+import { Search, User } from "lucide-react";
+import { Button, Spinner } from "@/components/atoms";
 import { HeaderUserActions } from "@/components/molecules/header-user-actions";
 import { HeaderShoppingBag } from "@/components/molecules/header-shopping-bag";
 import { COOKIE_KEYS, getCookie } from "@/lib/cookie";
-import { query } from "@/lib/apollo";
-import { GET_RECAPTCHA_CONFIG } from "@/graphql/auth/query";
-import { ReCaptchaFormEnum } from "@/gql/graphql";
+
+function HeaderUserActionsFallback() {
+  return (
+    <Button variant="ghost" size="sm" disabled className="flex items-center gap-1.5">
+      <User className="size-5" />
+      <Spinner className="size-4" />
+    </Button>
+  );
+}
 
 export async function HeaderActions() {
   const authToken = await getCookie(COOKIE_KEYS.AUTH_TOKEN);
   const isAuthenticated = Boolean(authToken);
-
-  let recaptchaConfig = null;
-  if (!isAuthenticated) {
-    try {
-      const res = await query({
-        query: GET_RECAPTCHA_CONFIG,
-        variables: { formType: ReCaptchaFormEnum.CustomerCreate },
-      });
-      recaptchaConfig = res.data?.recaptchaFormConfig;
-    } catch (e) {
-      console.error("Failed to fetch recaptcha config", e);
-    }
-  }
 
   return (
     <div className="flex items-center gap-1 justify-end">
@@ -30,10 +24,9 @@ export async function HeaderActions() {
         <Search className="h-5 w-5" />
       </Button>
       <div className="hidden md:block">
-        <HeaderUserActions
-          isAuthenticated={isAuthenticated}
-          recaptchaConfig={recaptchaConfig}
-        />
+        <Suspense fallback={<HeaderUserActionsFallback />}>
+          <HeaderUserActions />
+        </Suspense>
       </div>
       <HeaderShoppingBag isAuthenticated={isAuthenticated} />
     </div>
