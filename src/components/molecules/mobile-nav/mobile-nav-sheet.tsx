@@ -12,18 +12,13 @@ import {
   SheetTrigger,
   Button,
 } from "@/components/atoms";
-import { GetRecaptchaConfigQuery } from "@/gql/graphql";
+import { GetHeaderDataQuery, GetRecaptchaConfigQuery } from "@/gql/graphql";
+import { useFragment } from "@/gql";
+import { NAVIGATION_MENU_FRAGMENT } from "@/components/molecules/navigation-menu/navigation-menu-fragment";
 import { LoginForm } from "@/components/organisms/auth-popover/login-form";
 import { RegisterForm } from "@/components/organisms/auth-popover/register-form";
 import { ForgotPasswordForm } from "@/components/organisms/auth-popover/forgot-password-form";
 import { MobileNavClient } from "./mobile-nav-client";
-
-type NavItem = {
-  uid: string;
-  name: string;
-  url_path: string;
-  children: NavItem[];
-};
 
 type RecaptchaConfig = GetRecaptchaConfigQuery["recaptchaFormConfig"] | null;
 
@@ -36,12 +31,12 @@ const VIEW_TITLES: Record<Exclude<MobileView, "menu">, string> = {
 };
 
 export function MobileNavSheet({
-  navItems,
+  headerDataQuery,
   isAuthenticated,
   recaptchaConfigs,
   footer,
 }: {
-  navItems: NavItem[];
+  headerDataQuery: GetHeaderDataQuery;
   isAuthenticated: boolean;
   recaptchaConfigs: {
     login: RecaptchaConfig;
@@ -53,6 +48,33 @@ export function MobileNavSheet({
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [view, setView] = useState<MobileView>("menu");
+
+  const categoriesData = useFragment(
+    NAVIGATION_MENU_FRAGMENT,
+    headerDataQuery.categories,
+  );
+
+  const categories = categoriesData?.items?.[0]?.children || [];
+  const navItems = categories
+    .slice()
+    .sort((a, b) => Number(a?.position) - Number(b?.position))
+    .map((cat) => {
+      const children = (cat?.children || [])
+        .slice()
+        .sort((a, b) => Number(a?.position) - Number(b?.position));
+
+      return {
+        uid: cat?.uid || "",
+        name: cat?.name || "",
+        url_path: cat?.url_path || "",
+        children: children.map((child) => ({
+          uid: child?.uid || "",
+          name: child?.name || "",
+          url_path: child?.url_path || "",
+          children: [],
+        })),
+      };
+    });
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
@@ -73,14 +95,9 @@ export function MobileNavSheet({
           <Menu className="h-6 w-6" />
         </Button>
       </SheetTrigger>
-      <SheetContent
-        side="left"
-        className="w-[85vw] max-w-sm p-0 flex flex-col"
-      >
+      <SheetContent side="left" className="w-[85vw] max-w-sm p-0 flex flex-col">
         <SheetHeader className="p-4 border-b sr-only">
-          <SheetTitle>
-            {view === "menu" ? "Main Menu" : "Account"}
-          </SheetTitle>
+          <SheetTitle>{view === "menu" ? "Main Menu" : "Account"}</SheetTitle>
         </SheetHeader>
 
         {view === "menu" ? (
@@ -124,11 +141,11 @@ export function MobileNavSheet({
             <div className="p-4 border-b flex items-center gap-3">
               <button
                 type="button"
-                onClick={() =>
-                  setView(view === "login" ? "menu" : "login")
-                }
+                onClick={() => setView(view === "login" ? "menu" : "login")}
                 className="p-1 -ml-1 text-muted-foreground hover:text-foreground transition-colors"
-                aria-label={view === "login" ? "Back to menu" : "Back to sign in"}
+                aria-label={
+                  view === "login" ? "Back to menu" : "Back to sign in"
+                }
               >
                 <ArrowLeft className="h-5 w-5" />
               </button>

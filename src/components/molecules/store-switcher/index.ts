@@ -1,2 +1,2 @@
 export * from "./store-switcher";
-export * from "./store-switcher.fragment";
+export * from "./store-switcher-fragment";

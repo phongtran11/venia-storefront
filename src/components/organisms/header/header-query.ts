@@ -1,18 +1,18 @@
 import { graphql } from "@/gql";
 
-export const GET_HEADER_STORE_CONFIG = graphql(`
-  query GetHeaderStoreConfig {
+export const GET_HEADER_DATA = graphql(`
+  query GetHeaderData {
     storeConfig {
-      header_logo_src
-      logo_alt
-      logo_height
-      logo_width
+      ...StoreConfigFragment
     }
     availableStores {
       ...AvailableStoreFragment
     }
     currency {
       ...CurrencyFragment
+    }
+    categories {
+      ...NavigationMenuFragment
     }
   }
 `);

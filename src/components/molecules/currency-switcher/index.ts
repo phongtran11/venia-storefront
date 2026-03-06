@@ -1,2 +1,2 @@
 export * from "./currency-switcher";
-export * from "./currency-switcher.fragment";
+export * from "./currency-switcher-fragment";

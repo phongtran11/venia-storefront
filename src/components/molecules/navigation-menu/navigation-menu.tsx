@@ -1,13 +1,22 @@
+"use client";
+
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
-import { GetNavigationMenuQuery } from "@/gql/graphql";
+import { useFragment } from "@/gql";
+import { GetHeaderDataQuery } from "@/gql/graphql";
+import { NAVIGATION_MENU_FRAGMENT } from "./navigation-menu-fragment";
 
 export function NavigationMenu({
-  navigationData,
+  headerDataQuery,
 }: {
-  navigationData?: GetNavigationMenuQuery;
+  headerDataQuery: GetHeaderDataQuery;
 }) {
-  const categories = navigationData?.categories?.items?.[0]?.children || [];
+  const categoriesData = useFragment(
+    NAVIGATION_MENU_FRAGMENT,
+    headerDataQuery.categories,
+  );
+
+  const categories = categoriesData?.items?.[0]?.children || [];
 
   const navItems = categories
     .slice()

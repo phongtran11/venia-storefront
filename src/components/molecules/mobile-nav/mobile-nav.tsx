@@ -1,13 +1,10 @@
 import { Separator } from "@/components/atoms";
-import {
-  GetNavigationMenuQuery,
-  GetHeaderStoreConfigQuery,
-  ReCaptchaFormEnum,
-} from "@/gql/graphql";
+import { GetHeaderDataQuery } from "@/gql/graphql";
 import { StoreSwitcher, CurrencySwitcher } from "@/components/molecules";
 import { COOKIE_KEYS, getCookie } from "@/lib/cookie";
 import { query } from "@/lib/apollo";
 import { GET_RECAPTCHA_CONFIG } from "@/graphql/auth/query";
+import { ReCaptchaFormEnum } from "@/gql/graphql";
 import { MobileNavSheet } from "./mobile-nav-sheet";
 
 async function fetchRecaptchaConfig(formType: ReCaptchaFormEnum) {
@@ -23,13 +20,9 @@ async function fetchRecaptchaConfig(formType: ReCaptchaFormEnum) {
 }
 
 export async function MobileNav({
-  navigationData,
-  availableStoresData,
-  currencyData,
+  headerDataQuery,
 }: {
-  navigationData?: GetNavigationMenuQuery;
-  availableStoresData?: GetHeaderStoreConfigQuery["availableStores"];
-  currencyData?: GetHeaderStoreConfigQuery["currency"];
+  headerDataQuery: GetHeaderDataQuery;
 }) {
   const [currentStore, currentCurrency, authToken] = await Promise.all([
     getCookie(COOKIE_KEYS.STORE_VIEW),
@@ -54,39 +47,17 @@ export async function MobileNav({
     recaptchaConfigs = { login, register, forgotPassword };
   }
 
-  const categories = navigationData?.categories?.items?.[0]?.children || [];
-  const navItems = categories
-    .slice()
-    .sort((a, b) => Number(a?.position) - Number(b?.position))
-    .map((cat) => {
-      const children = (cat?.children || [])
-        .slice()
-        .sort((a, b) => Number(a?.position) - Number(b?.position));
-
-      return {
-        uid: cat?.uid || "",
-        name: cat?.name || "",
-        url_path: cat?.url_path || "",
-        children: children.map((child) => ({
-          uid: child?.uid || "",
-          name: child?.name || "",
-          url_path: child?.url_path || "",
-          children: [],
-        })),
-      };
-    });
-
   return (
     <div className="lg:hidden flex items-center">
       <MobileNavSheet
-        navItems={navItems}
+        headerDataQuery={headerDataQuery}
         isAuthenticated={isAuthenticated}
         recaptchaConfigs={recaptchaConfigs}
         footer={
           <div className="p-4 flex items-center bg-accent/50 justify-between">
             <div className="flex-1">
               <StoreSwitcher
-                availableStoresFragment={availableStoresData || null}
+                headerDataQuery={headerDataQuery}
                 currentStore={currentStore || "default"}
               />
             </div>
@@ -96,7 +67,7 @@ export async function MobileNav({
             />
             <div>
               <CurrencySwitcher
-                currencyFragment={currencyData || null}
+                headerDataQuery={headerDataQuery}
                 currentCurrency={currentCurrency || "USD"}
               />
             </div>

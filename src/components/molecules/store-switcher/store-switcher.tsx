@@ -10,22 +10,22 @@ import {
 } from "@/components/atoms";
 import { useEffect, useState } from "react";
 import { setStoreAction } from "@/lib/actions/store-actions";
-import { AvailableStoreFragment } from "./store-switcher.fragment";
+import { AvailableStoreFragment } from "./store-switcher-fragment";
 import { FragmentType, useFragment } from "@/gql";
-import { GetHeaderStoreConfigQuery } from "@/gql/graphql";
+import { GetHeaderDataQuery } from "@/gql/graphql";
 
 export function StoreSwitcher({
-  availableStoresFragment,
+  headerDataQuery,
   currentStore,
 }: {
-  availableStoresFragment: GetHeaderStoreConfigQuery["availableStores"];
+  headerDataQuery: GetHeaderDataQuery;
   currentStore: string;
 }) {
   const [mounted, setMounted] = useState(false);
 
   const availableStores = useFragment(
     AvailableStoreFragment,
-    availableStoresFragment?.filter(Boolean) as Array<
+    headerDataQuery?.availableStores?.filter(Boolean) as Array<
       FragmentType<typeof AvailableStoreFragment>
     >,
   );
@@ -61,11 +61,13 @@ export function StoreSwitcher({
       </SelectTrigger>
       <SelectContent position="popper">
         <SelectGroup>
-          {availableStores?.map((store) => (
-            <SelectItem key={store?.store_code} value={store?.store_code || ""}>
-              {store?.store_name}
-            </SelectItem>
-          ))}
+          {availableStores?.map((store) =>
+            store.store_code && store.store_name ? (
+              <SelectItem key={store.store_code} value={store.store_code}>
+                {store.store_name}
+              </SelectItem>
+            ) : null,
+          )}
         </SelectGroup>
       </SelectContent>
     </Select>

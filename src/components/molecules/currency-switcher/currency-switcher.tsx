@@ -11,23 +11,23 @@ import {
 } from "@/components/atoms";
 import { setCurrencyAction } from "@/lib/actions/store-actions";
 import { useEffect, useState } from "react";
-import { CurrencyFragment } from "./currency-switcher.fragment";
+import { CurrencyFragment } from "./currency-switcher-fragment";
 import { useFragment } from "@/gql";
-import { GetHeaderStoreConfigQuery } from "@/gql/graphql";
+import { GetHeaderDataQuery } from "@/gql/graphql";
 
 export function CurrencySwitcher({
-  currencyFragment,
+  headerDataQuery,
   currentCurrency,
 }: {
-  currencyFragment: GetHeaderStoreConfigQuery["currency"];
+  headerDataQuery: GetHeaderDataQuery;
   currentCurrency: string;
 }) {
   const [mounted, setMounted] = useState(false);
 
-  const currency = useFragment(CurrencyFragment, currencyFragment);
+  const currency = useFragment(CurrencyFragment, headerDataQuery.currency);
 
   const activeCurrencyCode =
-    currentCurrency || currency?.default_display_currency_code;
+    currency?.default_display_currency_code || currentCurrency;
 
   const currencyIcons = {
     USD: <DollarSign className="h-4 w-4 text-primary" />,
@@ -53,21 +53,20 @@ export function CurrencySwitcher({
   }
 
   return (
-    <Select
-      onValueChange={handleValueChange}
-      defaultValue={activeCurrencyCode || ""}
-    >
+    <Select onValueChange={handleValueChange} defaultValue={activeCurrencyCode}>
       <SelectTrigger className="border-none shadow-none focus-visible:ring-0 [&>_svg]:hidden">
         <SelectValue className="flex items-center justify-center" />
       </SelectTrigger>
       <SelectContent position="popper">
         <SelectGroup>
-          {currency?.available_currency_codes?.map((currencyCode) => (
-            <SelectItem key={currencyCode} value={currencyCode || ""}>
-              {currencyIcons[currencyCode as keyof typeof currencyIcons]}{" "}
-              {currencyCode}
-            </SelectItem>
-          ))}
+          {currency?.available_currency_codes?.map((currencyCode) =>
+            currencyCode ? (
+              <SelectItem key={currencyCode} value={currencyCode}>
+                {currencyIcons[currencyCode as keyof typeof currencyIcons]}{" "}
+                {currencyCode}
+              </SelectItem>
+            ) : null,
+          )}
         </SelectGroup>
       </SelectContent>
     </Select>
