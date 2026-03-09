@@ -1,28 +1,31 @@
 import {
   HeaderActions,
-  NavigationMenu,
   MobileNav,
   Logo,
+  NavigationMenu,
 } from "@/components/molecules";
-import { GetHeaderDataQuery } from "@/gql/graphql";
+import { GetStoreConfigQuery } from "@/gql/graphql";
+import { Suspense } from "react";
 
-export async function MainNav({
-  headerDataQuery,
+export function MainNav({
+  storeConfigData,
 }: {
-  headerDataQuery: GetHeaderDataQuery;
+  storeConfigData: GetStoreConfigQuery;
 }) {
   return (
     <div className="border-b relative">
       <div className="container flex lg:grid lg:grid-cols-12 items-center justify-between h-16">
         {/* Left Side: Mobile Menu + Logo */}
         <div className="flex items-center gap-4 lg:gap-8 justify-start lg:col-span-2">
-          <MobileNav headerDataQuery={headerDataQuery} />
-          <Logo headerDataQuery={headerDataQuery} />
+          <MobileNav storeConfigData={storeConfigData} />
+          <Logo storeConfigQuery={storeConfigData.storeConfig} />
         </div>
 
         {/* Center: Desktop Nav */}
         <div className="hidden lg:flex lg:justify-center lg:col-span-8">
-          <NavigationMenu headerDataQuery={headerDataQuery} />
+          <Suspense>
+            <NavigationMenu />
+          </Suspense>
         </div>
 
         {/* Right Side: Actions */}

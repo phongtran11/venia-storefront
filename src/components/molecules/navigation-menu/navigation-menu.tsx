@@ -1,43 +1,13 @@
-"use client";
-
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
-import { useFragment } from "@/gql";
-import { GetHeaderDataQuery } from "@/gql/graphql";
-import { NAVIGATION_MENU_FRAGMENT } from "./navigation-menu-fragment";
+import { formatNavigationCategories } from "@/graphql";
+import { getNavigationCategories } from "@/apis";
 
-export function NavigationMenu({
-  headerDataQuery,
-}: {
-  headerDataQuery: GetHeaderDataQuery;
-}) {
-  const categoriesData = useFragment(
-    NAVIGATION_MENU_FRAGMENT,
-    headerDataQuery.categories,
-  );
+export async function NavigationMenu() {
+  const data = await getNavigationCategories();
+  const navItems = formatNavigationCategories(data?.categories);
 
-  const categories = categoriesData?.items?.[0]?.children || [];
-
-  const navItems = categories
-    .slice()
-    .sort((a, b) => Number(a?.position) - Number(b?.position))
-    .map((cat) => {
-      const children = (cat?.children || [])
-        .slice()
-        .sort((a, b) => Number(a?.position) - Number(b?.position));
-
-      return {
-        label: cat?.name,
-        href: `/${cat?.url_path}`,
-        uid: cat?.uid,
-        hasChildren: children.length > 0,
-        children: children.map((child) => ({
-          label: child?.name,
-          href: `/${child?.url_path}`,
-          uid: child?.uid,
-        })),
-      };
-    });
+  if (!navItems.length) return null;
 
   return (
     <nav className="flex items-center h-full">

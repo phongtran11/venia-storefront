@@ -1,6 +1,6 @@
 import { COOKIE_KEYS, getCookie } from "@/lib/cookie";
 import { query } from "@/lib/apollo";
-import { GET_RECAPTCHA_CONFIG } from "@/graphql/auth/query";
+import { GET_RECAPTCHA_CONFIG } from "@/graphql/auth/auth-query";
 import { ReCaptchaFormEnum } from "@/gql/graphql";
 import { AuthPopover } from "@/components/organisms/auth-popover";
 import { UserAccountMenu } from "./user-account-menu";
@@ -31,9 +31,5 @@ export async function HeaderUserActions() {
     fetchRecaptchaConfig(ReCaptchaFormEnum.CustomerForgotPassword),
   ]);
 
-  return (
-    <AuthPopover
-      recaptchaConfigs={{ login, register, forgotPassword }}
-    />
-  );
+  return <AuthPopover recaptchaConfigs={{ login, register, forgotPassword }} />;
 }

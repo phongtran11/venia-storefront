@@ -21,7 +21,7 @@ import {
   Spinner,
 } from "@/components/atoms";
 
-import { CREATE_CUSTOMER } from "@/graphql/auth/mutation";
+import { CREATE_CUSTOMER } from "@/graphql/auth/auth-mutation";
 import { GetRecaptchaConfigQuery } from "@/gql/graphql";
 
 const registerSchema = z.object({
@@ -67,9 +67,7 @@ export function RegisterForm({
     );
   }
 
-  return (
-    <RegisterFormContent onCancel={onCancel} onSuccess={onSuccess} />
-  );
+  return <RegisterFormContent onCancel={onCancel} onSuccess={onSuccess} />;
 }
 
 function RecaptchaRegisterFormContent({
@@ -123,9 +121,7 @@ function RegisterFormContent({
 
   const onSubmit = async (values: z.infer<typeof registerSchema>) => {
     try {
-      const token = getRecaptchaToken
-        ? await getRecaptchaToken()
-        : null;
+      const token = getRecaptchaToken ? await getRecaptchaToken() : null;
 
       await createCustomer({
         variables: {

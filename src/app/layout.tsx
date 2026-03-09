@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { ApolloProvider } from "@/lib/apollo";
 import "./globals.css";
+import { Suspense } from "react";
 import { Header } from "@/components/organisms";
 
 const geistSans = Geist({
@@ -23,7 +24,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} antialiased`}>
         <ApolloProvider>
-          <Header />
+          <Suspense fallback={null}>
+            <Header />
+          </Suspense>
           {children}
         </ApolloProvider>
       </body>

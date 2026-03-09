@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react"],
   },
+  cacheComponents: true,
   logging: {
     fetches: {
       fullUrl: true,

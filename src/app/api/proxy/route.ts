@@ -14,11 +14,13 @@ export async function POST(request: Request) {
       body: JSON.stringify(body),
     });
 
-    const resultCloned = response.clone();
-
     logger.info(
-      await resultCloned.json(),
-      `[Proxy] ${body.operationName} : ${JSON.stringify(body.variables)}`,
+      {
+        operationName: body.operationName,
+        variables: body.variables,
+        status: response.status,
+      },
+      `[Proxy RSC] ${body.operationName}`,
     );
 
     return response;

@@ -21,7 +21,7 @@ import {
   Spinner,
 } from "@/components/atoms";
 
-import { REQUEST_PASSWORD_RESET_EMAIL } from "@/graphql/auth/mutation";
+import { REQUEST_PASSWORD_RESET_EMAIL } from "@/graphql/auth/auth-mutation";
 import { GetRecaptchaConfigQuery } from "@/gql/graphql";
 
 const forgotPasswordSchema = z.object({
@@ -112,9 +112,7 @@ function ForgotPasswordContent({
 
   const onSubmit = async (values: z.infer<typeof forgotPasswordSchema>) => {
     try {
-      const captchaToken = getRecaptchaToken
-        ? await getRecaptchaToken()
-        : null;
+      const captchaToken = getRecaptchaToken ? await getRecaptchaToken() : null;
 
       await requestReset({
         variables: { email: values.email },
@@ -190,11 +188,7 @@ function ForgotPasswordContent({
             >
               CANCEL
             </Button>
-            <Button
-              type="submit"
-              className="flex-1"
-              disabled={isDisabled}
-            >
+            <Button type="submit" className="flex-1" disabled={isDisabled}>
               {loading ? <Spinner className="size-4 mr-2" /> : null}
               SUBMIT
             </Button>

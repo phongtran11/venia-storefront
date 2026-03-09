@@ -22,7 +22,7 @@ import {
   Spinner,
 } from "@/components/atoms";
 
-import { GENERATE_CUSTOMER_TOKEN } from "@/graphql/auth/mutation";
+import { GENERATE_CUSTOMER_TOKEN } from "@/graphql/auth/auth-mutation";
 import { loginAction } from "@/lib/actions/auth-actions";
 import { GetRecaptchaConfigQuery } from "@/gql/graphql";
 
@@ -147,9 +147,7 @@ function LoginFormContent({
 
   const onSubmit = async (values: z.infer<typeof loginSchema>) => {
     try {
-      const captchaToken = getRecaptchaToken
-        ? await getRecaptchaToken()
-        : null;
+      const captchaToken = getRecaptchaToken ? await getRecaptchaToken() : null;
 
       await generateCustomerToken({
         variables: values,

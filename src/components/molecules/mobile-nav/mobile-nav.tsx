@@ -1,11 +1,13 @@
 import { Separator } from "@/components/atoms";
-import { GetHeaderDataQuery } from "@/gql/graphql";
+import { GetStoreConfigQuery } from "@/gql/graphql";
 import { StoreSwitcher, CurrencySwitcher } from "@/components/molecules";
-import { COOKIE_KEYS, getCookie } from "@/lib/cookie";
 import { query } from "@/lib/apollo";
-import { GET_RECAPTCHA_CONFIG } from "@/graphql/auth/query";
+import { GET_RECAPTCHA_CONFIG } from "@/graphql/auth/auth-query";
 import { ReCaptchaFormEnum } from "@/gql/graphql";
 import { MobileNavSheet } from "./mobile-nav-sheet";
+import { MobileNavCategories } from "./mobile-nav-categories";
+import { COOKIE_KEYS, getCookie } from "@/lib/cookie";
+import { Suspense } from "react";
 
 async function fetchRecaptchaConfig(formType: ReCaptchaFormEnum) {
   try {
@@ -20,9 +22,9 @@ async function fetchRecaptchaConfig(formType: ReCaptchaFormEnum) {
 }
 
 export async function MobileNav({
-  headerDataQuery,
+  storeConfigData,
 }: {
-  headerDataQuery: GetHeaderDataQuery;
+  storeConfigData: GetStoreConfigQuery;
 }) {
   const [currentStore, currentCurrency, authToken] = await Promise.all([
     getCookie(COOKIE_KEYS.STORE_VIEW),
@@ -50,14 +52,18 @@ export async function MobileNav({
   return (
     <div className="lg:hidden flex items-center">
       <MobileNavSheet
-        headerDataQuery={headerDataQuery}
         isAuthenticated={isAuthenticated}
         recaptchaConfigs={recaptchaConfigs}
+        menuContent={
+          <Suspense>
+            <MobileNavCategories />
+          </Suspense>
+        }
         footer={
           <div className="p-4 flex items-center bg-accent/50 justify-between">
             <div className="flex-1">
               <StoreSwitcher
-                headerDataQuery={headerDataQuery}
+                availableStoresFragmentData={storeConfigData.availableStores}
                 currentStore={currentStore || "default"}
               />
             </div>
@@ -67,7 +73,7 @@ export async function MobileNav({
             />
             <div>
               <CurrencySwitcher
-                headerDataQuery={headerDataQuery}
+                currencyFragmentData={storeConfigData.currency}
                 currentCurrency={currentCurrency || "USD"}
               />
             </div>

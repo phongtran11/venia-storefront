@@ -1,24 +1,26 @@
 import { query } from "@/lib/apollo";
 import { TopBar } from "./top-bar";
 import { MainNav } from "./main-nav";
-import { GET_HEADER_DATA } from "./header-query";
+import { GET_STORE_CONFIG } from "@/graphql";
 
 export async function Header() {
-  const headerDataQuery = await query({
-    query: GET_HEADER_DATA,
+  const storeConfigQuery = await query({
+    query: GET_STORE_CONFIG,
   });
 
-  if (!headerDataQuery.data) {
-    throw new Error("Fail to fetch header data");
+  const storeConfigData = storeConfigQuery.data;
+
+  if (!storeConfigData) {
+    throw new Error("Fail to fetch store config data");
   }
 
   return (
     <>
       {/* Top Bar: Store View & Currency */}
-      <TopBar headerDataQuery={headerDataQuery.data} />
+      <TopBar storeConfigData={storeConfigData} />
       <header className="w-full sticky top-0 z-50 bg-background">
         {/* Main Navigation: Logo, Navigation Menu, Search, Account, Cart */}
-        <MainNav headerDataQuery={headerDataQuery.data} />
+        <MainNav storeConfigData={storeConfigData} />
       </header>
     </>
   );

@@ -12,20 +12,20 @@ import { useEffect, useState } from "react";
 import { setStoreAction } from "@/lib/actions/store-actions";
 import { AvailableStoreFragment } from "./store-switcher-fragment";
 import { FragmentType, useFragment } from "@/gql";
-import { GetHeaderDataQuery } from "@/gql/graphql";
+import { GetStoreConfigQuery } from "@/gql/graphql";
 
 export function StoreSwitcher({
-  headerDataQuery,
+  availableStoresFragmentData,
   currentStore,
 }: {
-  headerDataQuery: GetHeaderDataQuery;
+  availableStoresFragmentData: GetStoreConfigQuery["availableStores"];
   currentStore: string;
 }) {
   const [mounted, setMounted] = useState(false);
 
   const availableStores = useFragment(
     AvailableStoreFragment,
-    headerDataQuery?.availableStores?.filter(Boolean) as Array<
+    availableStoresFragmentData?.filter(Boolean) as Array<
       FragmentType<typeof AvailableStoreFragment>
     >,
   );

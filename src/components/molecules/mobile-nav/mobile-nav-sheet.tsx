@@ -12,13 +12,10 @@ import {
   SheetTrigger,
   Button,
 } from "@/components/atoms";
-import { GetHeaderDataQuery, GetRecaptchaConfigQuery } from "@/gql/graphql";
-import { useFragment } from "@/gql";
-import { NAVIGATION_MENU_FRAGMENT } from "@/components/molecules/navigation-menu/navigation-menu-fragment";
+import { GetRecaptchaConfigQuery } from "@/gql/graphql";
 import { LoginForm } from "@/components/organisms/auth-popover/login-form";
 import { RegisterForm } from "@/components/organisms/auth-popover/register-form";
 import { ForgotPasswordForm } from "@/components/organisms/auth-popover/forgot-password-form";
-import { MobileNavClient } from "./mobile-nav-client";
 
 type RecaptchaConfig = GetRecaptchaConfigQuery["recaptchaFormConfig"] | null;
 
@@ -31,50 +28,23 @@ const VIEW_TITLES: Record<Exclude<MobileView, "menu">, string> = {
 };
 
 export function MobileNavSheet({
-  headerDataQuery,
   isAuthenticated,
   recaptchaConfigs,
+  menuContent,
   footer,
 }: {
-  headerDataQuery: GetHeaderDataQuery;
   isAuthenticated: boolean;
   recaptchaConfigs: {
     login: RecaptchaConfig;
     register: RecaptchaConfig;
     forgotPassword: RecaptchaConfig;
   };
+  menuContent: ReactNode;
   footer: ReactNode;
 }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [view, setView] = useState<MobileView>("menu");
-
-  const categoriesData = useFragment(
-    NAVIGATION_MENU_FRAGMENT,
-    headerDataQuery.categories,
-  );
-
-  const categories = categoriesData?.items?.[0]?.children || [];
-  const navItems = categories
-    .slice()
-    .sort((a, b) => Number(a?.position) - Number(b?.position))
-    .map((cat) => {
-      const children = (cat?.children || [])
-        .slice()
-        .sort((a, b) => Number(a?.position) - Number(b?.position));
-
-      return {
-        uid: cat?.uid || "",
-        name: cat?.name || "",
-        url_path: cat?.url_path || "",
-        children: children.map((child) => ({
-          uid: child?.uid || "",
-          name: child?.name || "",
-          url_path: child?.url_path || "",
-          children: [],
-        })),
-      };
-    });
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
@@ -108,7 +78,7 @@ export function MobileNavSheet({
               </span>
             </div>
             <div className="flex-1 overflow-auto">
-              <MobileNavClient navItems={navItems} />
+              {menuContent}
             </div>
             <div className="mt-auto border-t">
               {footer}

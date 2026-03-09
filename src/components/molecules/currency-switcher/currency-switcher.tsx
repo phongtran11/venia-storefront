@@ -9,22 +9,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/atoms";
-import { setCurrencyAction } from "@/lib/actions/store-actions";
+import { setCurrencyAction } from "@/lib/actions";
 import { useEffect, useState } from "react";
-import { CurrencyFragment } from "./currency-switcher-fragment";
 import { useFragment } from "@/gql";
-import { GetHeaderDataQuery } from "@/gql/graphql";
+import { GetStoreConfigQuery } from "@/gql/graphql";
+import { CurrencyFragment } from "@/graphql";
 
 export function CurrencySwitcher({
-  headerDataQuery,
+  currencyFragmentData,
   currentCurrency,
 }: {
-  headerDataQuery: GetHeaderDataQuery;
+  currencyFragmentData: GetStoreConfigQuery["currency"];
   currentCurrency: string;
 }) {
   const [mounted, setMounted] = useState(false);
 
-  const currency = useFragment(CurrencyFragment, headerDataQuery.currency);
+  const currency = useFragment(CurrencyFragment, currencyFragmentData);
 
   const activeCurrencyCode =
     currency?.default_display_currency_code || currentCurrency;

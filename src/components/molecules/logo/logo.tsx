@@ -3,18 +3,15 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useFragment } from "@/gql";
-import { GetHeaderDataQuery } from "@/gql/graphql";
-import { StoreConfigFragment } from "./store-config-fragment";
+import { GetStoreConfigQuery } from "@/gql/graphql";
+import { StoreLogoFragment } from "@/graphql";
 
 export function Logo({
-  headerDataQuery,
+  storeConfigQuery,
 }: {
-  headerDataQuery: GetHeaderDataQuery;
+  storeConfigQuery: GetStoreConfigQuery["storeConfig"];
 }) {
-  const storeConfig = useFragment(
-    StoreConfigFragment,
-    headerDataQuery.storeConfig,
-  );
+  const storeConfig = useFragment(StoreLogoFragment, storeConfigQuery);
 
   return (
     <Link
